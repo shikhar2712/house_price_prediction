@@ -1,56 +1,47 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import matplotlib.pyplot as plt
 
-# Load trained model
+# Load model
 model = joblib.load("models/house_price_model.pkl")
 
-# Get features used during training
 model_features = model.feature_names_in_
 
 st.set_page_config(page_title="House Price Predictor", layout="centered")
 
 st.title("🏡 House Price Prediction")
+
 st.write(
 """
-This application predicts house prices using a **Random Forest Machine Learning model**  
+This demo predicts house prices using a **Random Forest Regression model**
 trained on the Ames Housing dataset.
 """
 )
 
+st.markdown("---")
+
 st.header("Enter Property Details")
 
-# Key features based on your feature importance
-overall_qual = st.slider("Overall Quality (1-10)", 1, 10, 5)
+col1, col2 = st.columns(2)
 
-gr_liv_area = st.number_input(
-    "Above Ground Living Area (sq ft)", min_value=500, max_value=5000, value=1500
-)
+with col1:
+    overall_qual = st.slider("Overall Quality", 1, 10, 5)
+    gr_liv_area = st.number_input("Living Area (sq ft)", 500, 5000, 1500)
+    first_flr = st.number_input("1st Floor Area (sq ft)", 400, 3000, 1200)
+    garage_cars = st.slider("Garage Capacity", 0, 4, 2)
 
-first_flr = st.number_input(
-    "First Floor Area (sq ft)", min_value=400, max_value=3000, value=1200
-)
+with col2:
+    second_flr = st.number_input("2nd Floor Area (sq ft)", 0, 2000, 300)
+    full_bath = st.slider("Full Bathrooms", 0, 4, 2)
+    lot_area = st.number_input("Lot Area (sq ft)", 1000, 20000, 8000)
+    kitchen_qual = st.slider("Kitchen Quality", 1, 5, 3)
 
-second_flr = st.number_input(
-    "Second Floor Area (sq ft)", min_value=0, max_value=2000, value=300
-)
-
-garage_cars = st.slider("Garage Capacity (cars)", 0, 4, 2)
-
-full_bath = st.slider("Full Bathrooms", 0, 4, 2)
-
-lot_area = st.number_input(
-    "Lot Area (sq ft)", min_value=1000, max_value=20000, value=8000
-)
-
-kitchen_qual = st.slider("Kitchen Quality (1-5)", 1, 5, 3)
-
-# Build full feature dataframe
+# Build feature dataframe
 input_df = pd.DataFrame(columns=model_features)
 input_df.loc[0] = 0
 
-# Populate known important features
-feature_values = {
+features = {
     "Overall Qual": overall_qual,
     "Gr Liv Area": gr_liv_area,
     "1st Flr SF": first_flr,
@@ -61,20 +52,48 @@ feature_values = {
     "Kitchen Qual": kitchen_qual,
 }
 
-for feature, value in feature_values.items():
+for feature, value in features.items():
     if feature in input_df.columns:
         input_df[feature] = value
 
 
-# Prediction
 if st.button("Predict House Price"):
 
     prediction = model.predict(input_df)[0]
 
-    st.success(f"💰 Estimated House Price: **${prediction:,.2f}**")
+    st.success(f"💰 Estimated House Price: **${prediction:,.0f}**")
+
+    # Simple confidence estimate
+    tree_preds = [tree.predict(input_df)[0] for tree in model.estimators_]
+    confidence = pd.Series(tree_preds).std()
+
+    st.info(f"Prediction variability (model uncertainty): ± ${confidence:,.0f}")
+
+
+st.markdown("---")
+
+st.header("Model Insights")
+
+# Feature importance
+importance = pd.Series(
+    model.feature_importances_,
+    index=model_features
+).sort_values(ascending=False).head(10)
+
+fig, ax = plt.subplots()
+
+importance.sort_values().plot.barh(ax=ax)
+
+ax.set_title("Top Features Influencing Price")
+
+st.pyplot(fig)
 
 st.markdown("---")
 
 st.caption(
-"Model: Random Forest Regressor | Dataset: Ames Housing | R² ≈ 0.91"
+"""
+Model: Random Forest Regressor  
+Dataset: Ames Housing  
+Test R² Score: ~0.91
+"""
 )
