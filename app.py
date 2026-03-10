@@ -13,10 +13,10 @@ st.set_page_config(page_title="House Price Predictor", layout="centered")
 st.title("🏡 House Price Prediction")
 
 st.write(
-"""
-This demo predicts house prices using a **Random Forest Regression model**
-trained on the Ames Housing dataset.
-"""
+    """
+    This demo predicts house prices using a **Random Forest Regression model**
+    trained on the Ames Housing dataset.
+    """
 )
 
 st.markdown("---")
@@ -56,7 +56,6 @@ for feature, value in features.items():
     if feature in input_df.columns:
         input_df[feature] = value
 
-
 if st.button("Predict House Price"):
 
     prediction = model.predict(input_df)[0]
@@ -69,7 +68,6 @@ if st.button("Predict House Price"):
 
     st.info(f"Prediction variability (model uncertainty): ± ${confidence:,.0f}")
 
-
 st.markdown("---")
 
 st.header("Model Insights")
@@ -81,19 +79,16 @@ importance = pd.Series(
 ).sort_values(ascending=False).head(10)
 
 fig, ax = plt.subplots()
-
 importance.sort_values().plot.barh(ax=ax)
-
 ax.set_title("Top Features Influencing Price")
-
 st.pyplot(fig)
 
 st.markdown("---")
 
 st.caption(
-"""
-Model: Random Forest Regressor  
-Dataset: Ames Housing  
-Test R² Score: ~0.91
-"""
+    """
+    Model: Random Forest Regressor  
+    Dataset: Ames Housing  
+    Test R² Score: ~0.91
+    """
 )
