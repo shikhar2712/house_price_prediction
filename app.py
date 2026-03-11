@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 # Load model
 model = joblib.load("models/house_price_model.pkl")
+scaler = joblib.load("models/scaler.pkl")
 
 model_features = model.feature_names_in_
 
@@ -18,6 +19,8 @@ st.write(
     trained on the Ames Housing dataset.
     """
 )
+
+st.sidebar.success("Model Performance: R² = 0.91")
 
 st.markdown("---")
 
@@ -58,12 +61,15 @@ for feature, value in features.items():
 
 if st.button("Predict House Price"):
 
-    prediction = model.predict(input_df)[0]
+    # scale the input using the same scaler used during training
+    input_scaled = scaler.transform(input_df)
+
+    # predict using the trained model
+    prediction = model.predict(input_scaled)[0]
 
     st.success(f"💰 Estimated House Price: **${prediction:,.0f}**")
-
     # Simple confidence estimate
-    tree_preds = [tree.predict(input_df.values)[0] for tree in model.estimators_]
+    tree_preds = [tree.predict(input_scaled)[0] for tree in model.estimators_]
     confidence = pd.Series(tree_preds).std()
 
     st.info(f"Prediction variability (model uncertainty): ± ${confidence:,.0f}")
