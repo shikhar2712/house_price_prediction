@@ -6,6 +6,9 @@ This project builds an **end-to-end machine learning pipeline** to predict housi
 
 The final model uses a **Random Forest Regressor and achieves an R² score of ~0.91**, explaining over 90% of the variance in housing prices.
 
+🔗 Live Demo: https://housepriceprediction-ea7v7evaz9juagqegpuyyy.streamlit.app/  
+📂 Dataset: Ames Housing Dataset  
+
 **Project Structure**
 
 house-price-prediction

@@ -63,7 +63,7 @@ if st.button("Predict House Price"):
     st.success(f"💰 Estimated House Price: **${prediction:,.0f}**")
 
     # Simple confidence estimate
-    tree_preds = [tree.predict(input_df)[0] for tree in model.estimators_]
+    tree_preds = [tree.predict(input_df.values)[0] for tree in model.estimators_]
     confidence = pd.Series(tree_preds).std()
 
     st.info(f"Prediction variability (model uncertainty): ± ${confidence:,.0f}")
